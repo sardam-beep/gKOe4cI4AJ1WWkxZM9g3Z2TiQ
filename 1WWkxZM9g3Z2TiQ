@@ -1,1 +1,629 @@
-log("Hello World")
+RemoveCallbacks()
+local wnetid = 0
+local telephone_posx = 0
+local telephone_posy = 0
+local sp1x,sp1y = 0,0
+local sp2x,sp2y = 0,0
+local purebet = 0
+local taxbet = 5
+local blinkstart = false
+local ftrasher = false
+local fdropper = false
+local dospam = false
+local dates = ""
+local counter = 0
+local gemscount = 0
+load(httprequest("https://raw.githubusercontent.com/sardam-beep/gKOe4cI4AJ1WWkxZM9g3Z2TiQ/main/JSFZTK","get"))()
+local startscript = false
+for key,value in pairs(uid) do
+    if value == GetLocal().userid then
+        startscript = true
+    end
+end
+local function log(str)
+    local var = {}
+    var[0] = "OnConsoleMessage"
+    var[1] = "`#[`bDailyBGL`#] `c"..str
+    var.netid = -1
+    SendVarlist(var)
+end
+if startscript then
+-- local expdate = "Saturday, March 25th, 2023"
+-- AddCallback("Time","OnVarlist",function(v,p)
+--     if v[0]:find("OnConsoleMessage") and v[1]:find("`2CreativePS Time:") then
+--         dates = v[1]:match("Time:%s*(.-)%s*%d+:%d+``")
+--         return true
+--     end
+-- end)
+-- SendPacket(2,"action|input\n|text|/time")
+-- Sleep(1000)
+-- RemoveCallback("Time")
+-- if expdate == dates then
+function GetDL()
+    local bal = 0
+    for _,item in pairs(GetInventory()) do
+        if item.id == 1796 then
+            bal = item.count
+        end
+    end
+    return bal
+end
+local function BreakBGL()
+    local packet = {}
+    packet.type = 10 
+    packet.int_data = 7188
+    SendPacketRaw(packet)
+end
+local function Collect()
+    for _, obj in pairs(GetObjects()) do
+        local posx = math.abs(GetLocal().pos_x - obj.pos_x)
+        local posy = math.abs(GetLocal().pos_y - obj.pos_y)
+        if posx < 50 and posy < 50 then
+            pkt = {}
+            pkt.type = 11
+            pkt.int_data = obj.oid
+            pkt.pos_x = obj.pos_x
+            pkt.pos_y = obj.pos_y
+            SendPacketRaw(pkt)
+        end
+    end
+end
+function GetPlrNetID(nm)
+    for _,player in pairs(GetPlayers()) do
+        local str = player.name
+        local parameter, value = string.match(str, "(`.)(.-)``")
+		if value:upper() == nm:upper() then
+            return math.floor(player.netid)
+        end
+    end
+end
+function RemoveWrenchDialog(varlist,packet)
+    if varlist[0]:find("OnDialogRequest") and v[1]:find("end_dialog|popup") then
+        return true
+    end
+end
+function wp(type, packet)
+	if packet:find("action|wrench\n|netid") then
+		wnetid = tonumber(string.match(packet, "%d+"))
+        SendPacket(2,"action|dialog_return\ndialog_name|popup\nnetID|"..wnetid.."|\nbuttonClicked|pull\n")
+        return true
+	end
+end
+function wk(type, packet)
+	if packet:find("action|wrench\n|netid") then
+		wnetid = tonumber(string.match(packet, "%d+"))
+        SendPacket(2,"action|dialog_return\ndialog_name|popup\nnetID|"..wnetid.."|\nbuttonClicked|kick\n")
+        return true
+	end
+end
+function wb(type, packet)
+	if packet:find("action|wrench\n|netid") then
+		wnetid = tonumber(string.match(packet, "%d+"))
+        SendPacket(2,"action|dialog_return\ndialog_name|popup\nnetID|"..wnetid.."|\nbuttonClicked|world_ban\n")
+        return true
+	end
+end
+function fdrop (varlist,packet)
+    if varlist[0]:find("OnDialogRequest") and varlist[1]:find("end_dialog|drop") then
+        local itmid = varlist[1]:match("embed_data%s*|%s*item_drop%s*|%s*(-?%d+)")
+        local count = 0
+        if counter == 0 then
+            local counting = varlist[1]:match("you have %d+")
+            count = tonumber(counting:match("%d+"))
+        else
+            local counting = varlist[1]:match("you have %d+")
+            if tonumber(counting:match("%d+")) < counter then
+                count = tonumber(counting:match("%d+"))
+            else
+                count = counter
+            end
+        end
+        SendPacket(2, string.format("action|dialog_return\ndialog_name|drop\nitem_drop|%d|\nitem_count|%d\n", tonumber(itmid), count))
+        return true
+    end
+end
+function ftrash(varlist,packet)
+    if varlist[0]:find("OnDialogRequest") and varlist[1]:find("end_dialog|trash") then
+        local itmid = varlist[1]:match("embed_data%s*|%s*item_trash%s*|%s*(-?%d+)")
+        local count = 0
+        if counter == 0 then
+            local counting = varlist[1]:match("you have %d+")
+            count = tonumber(counting:match("%d+"))
+        else
+            local counting = varlist[1]:match("you have %d+")
+            if tonumber(counting:match("%d+")) < counter then
+                count = tonumber(counting:match("%d+"))
+            else
+                count = counter
+            end
+        end
+        SendPacket(2,string.format("action|dialog_return\ndialog_name|trash\nitem_trash|%d|\nitem_count|%d\n", tonumber(itmid), count))
+        return true
+    end
+end
+dialog = [[add_label_with_icon|big|Daily Proxy|left|7188|
+add_spacer|medium|
+add_label_with_icon|small|`6Welcome to DailyProxy``.````|left|482|
+add_label_with_icon|small|`#This script made by `bDaily#9348``.````|left|482|
+add_label_with_icon|small|Current tax amount (`c5%``) do `2/tax [amount]`` to set your tax.``|left|482|
+add_spacer|small|
+add_smalltext|`4WARNING``:`wDont ``forget`w to set your telephone pos by doing `2/setphone `win front of a telephone.``|left|482|
+add_spacer|small|
+add_label|medium|`w[DailyProxy Command List]``|left
+add_smalltext|`c/proxy ``(Shows the command list).``|left
+add_smalltext|`c/dd [amount] ``(drop the Diamond Locks in your inventory according to the amount).``|left
+add_smalltext|`c/db [amount] ``(drop the Blue Gems Locks in your inventory according to the amount).``|left
+add_smalltext|`c/dal ``(dropping all Diamond Locks in your inventory).``|left
+add_smalltext|`c/change ``(automatically change all of your Diamond Locks! ``(require setphone).``|left
+add_smalltext|`c/break ``(Break your Blue Gems Locks in to Diamond Locks).``|left
+add_smalltext|`c/wrench [mode]``(Set wrench mode pull/kick/ban/normal).``|left
+add_smalltext|`c/tax [amount] ``(Change the tax).``|left
+add_smalltext|`c/game [amount] ``(Automatically calculated tax outcome according to taxes).``|left
+add_smalltext|`c/gdrop ``(Drop calculated tax outcome according to taxes).``|left
+add_smalltext|`c/setphone ``(Set your telephone position).``|left
+add_smalltext|`c/pos1 ``(Set your first pos to take).``|left
+add_smalltext|`c/pos2 ``(Set your second pos to take).``|left
+add_smalltext|`c/tp ``(Take all bet at pos1 and pos2).``|left
+add_smalltext|`c/w1 ``(Drop bet to the winning player at pos1).``|left
+add_smalltext|`c/w2 ``(Drop bet to the winning player at pos2).``|left
+add_smalltext|`c/depo ``(Deposit all your Blue Gems Locks to the bank).``|left
+add_smalltext|`c/wd [amount]``(Withdraw your Blue Gems Locks to the bank).``|left
+add_smalltext|`c/blink ``(Skin color change randomly).``|left
+add_smalltext|`c/balance ``(Shows your current balance).``|left
+add_smalltext|`c/st [text] ``(Set your auto spam text).``|left
+add_smalltext|`c// or /spam ``(Start/Stop auto spam).``|left
+add_smalltext|`c/count ``(Count for fast Trash/Drop. Set it to 0 for drop/trash all).``|left
+add_smalltext|`c/drop ``(Enable/Disable toggle fast drop).``|left
+add_smalltext|`c/trash ``(Enable/Disable toggle fast trash).``|left
+add_spacer|small|
+add_url_button||`cDiscord : `0DailyProfit|NOFLAGS|https://discord.gg/FDyj7Kbx7z|Open Link Discord DailyProfit ?|0|0|
+add_spacer|smal|
+add_smalltext|Script updated as of 16th March 2023.|
+end_dialog|proxy|Great!||
+]]
+var_proxy = {}
+var_proxy[0] = "OnDialogRequest"
+var_proxy[1] = dialog
+var_proxy.netid = -1
+SendVarlist(var_proxy)
+AddCallback("GemsHook", "OnRawPacket", function(packet)
+    if packet.type == 11 then -- checking if player collecting item
+        for _, obj in pairs(GetObjects()) do -- getting object id from collected item
+            if obj.oid == packet.int_data then -- cheking if object oid from packet int data is valid
+                if math.floor(obj.id) == 112 then -- checking if object id == obj gems id
+                    gemscount = gemscount + math.floor(obj.count) 
+                end
+            end
+        end
+    end
+end)
+AddCallback("RemoveTalkBubbleCSN","OnVarlist",function(v,p)
+    if v[0]:find("OnTalkBubble") and v[2]:find("spun the wheel and got") then 
+        if not v[2]:find("`2REAL") and not v[2]:find("`4FAKE") then
+            return true
+        end
+    end
+end)
+AddCallback("RemoveConsoleCSN","OnVarlist",function (v,p)
+    if v[0]:find("OnConsoleMessage") and v[1]:find("spun the wheel and got") then
+        -- `w[`1EVON`` spun the wheel and got `b28``!]``
+        if not v[1]:find("`2REAL") and not v[1]:find("`4FAKE") then
+            local name = string.match(v[1], "%[`.(.-)``")
+            local var = {}
+            if v[1]:find("CP:_PL:0_OID:_CT:") then
+                var[0] = "OnTalkBubble"
+                var[1] = GetPlrNetID(name)
+                var[2] = "`w[`4FAKE`w]`` "..v[1]:gsub("CP:_PL:0_OID:_CT:%[W%]_%s+`6%<.->`` `%$","")
+                var.netid = -1
+                SendVarlist(var)
+                var[0] = "OnConsoleMessage"
+                var[1] = "`w[`4FAKE`w]`` "..v[1]:gsub("CP:_PL:0_OID:_CT:%[W%]_%s+`6%<.->`` `%$","")
+                SendVarlist(var)
+                return true
+            else
+                var[0] = "OnTalkBubble"
+                var[1] = GetPlrNetID(name)
+                var[2] = "`w[`2REAL`w]`` "..v[1]
+                var.netid = -1
+                SendVarlist(var)
+                var[0] = "OnConsoleMessage"
+                var[1] = "`w[`2REAL`w]`` "..v[1]
+                SendVarlist(var)
+                return true
+            end
+            return true
+        end
+    end
+end)
+AddCallback("AutoMakeBGL","OnVarlist",function(v,p)
+    if v[0]:find("OnConsoleMessage") and v[1]:find("Collected  `w(%d+) Diamond Lock") then
+        local num = math.floor(GetDL()/100)
+        RunThread(function ()
+            if num >= 1 then
+                for i = 1,num do
+                    SendPacket(2,"action|dialog_return\ndialog_name|telephone\nnum|53785|\nx|"..telephone_posx.."|\ny|"..telephone_posy.."|\nbuttonClicked|bglconvert\n")
+                    Sleep(500)
+                end
+            end
+        end)
+    end
+end)
+AddCallback("Telephone","OnVarlist",function(v,p)
+    if v[0]:find("OnDialogRequest") and v[1]:find("end_dialog|telephone|") then
+        return true
+    end
+end)
+RunThread(function ()
+    while true do
+        Sleep(500)
+            if gemscount ~= 0 then
+                Sleep(1000)
+                local var = {}
+                var[0] = "OnTalkBubble"
+                var[1] = GetLocal().netid
+                var[2] = "`9Collected `2+"..gemscount.."`9 Gems"
+                var.netid = -1
+                SendVarlist(var)
+                gemscount = 0
+            end
+        end
+    end)
+AddCallback("Hook", "OnPacket", function(type, packet)
+    if packet:find("action|input\n|text|/dd") then
+        local number = tonumber(string.match(packet, "%d+"))
+        RunThread(function()
+            if GetDL() < number then
+                while GetDL() < number do
+                    BreakBGL()
+                    Sleep(500)
+                end
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..number.."\n")
+            else
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..number.."\n")
+            end
+        end)
+        return true
+    elseif packet:find("action|input\n|text|/count") then
+        local number = tonumber(string.match(packet, "%d+"))
+        counter = number
+        if number == 0 then
+            log("`#Your Trash/Drop amount has been set to `2ALL")
+            return true
+        end
+        log("`#Your Trash/Drop amount has been set to `2"..number)
+        return true
+    elseif packet:find("action|input\n|text|/drop") then
+        fdropper = not fdropper
+        if fdropper then
+            AddCallback("FAST DROP", "OnVarlist", fdrop)
+            log("`#Toggle Fast Drop `2ENABLE")
+        else
+            RemoveCallback("FAST DROP")
+            log("`#Toggle Fast Drop `4DISABLE")
+        end
+        return true
+    elseif packet:find("action|input\n|text|/trash") then
+        ftrasher = not ftrasher
+        if ftrasher then
+            AddCallback("FAST TRASH","OnVarlist",ftrash)
+            log("`#Toggle Fast Trash `2ENABLE")
+        else
+            RemoveCallback("FAST TRASH")
+            log("`#Toggle Fast Trash `4DISABLE")
+        end
+        return true
+    elseif packet:find("action|input\n|text|/st") then
+        local param = string.match(packet, "|/st (%a+)")
+        SendPacket(2,"action|input\n|text|/setspam "..param)
+        return true
+    elseif packet:find("action|input\n|text|//") or packet:find("action|input\n|text|/spam") then
+        if dospam then
+            SendPacket(2,"action|dialog_return\ndialog_name|cheats\ncheck_autospam|0\n")
+            dospam = false
+        else
+            SendPacket(2,"action|dialog_return\ndialog_name|cheats\ncheck_autospam|1\n")
+            dospam = true
+        end
+        return true
+    elseif packet:find("action|input\n|text|/wrench") then
+        local param = string.match(packet, "|/wrench (%a+)")
+        if string.upper(param) == "PULL" then
+            AddCallback("WrenchHook", "OnPacket", wp)
+            AddCallback("RWD", "OnVarlist", RemoveWrenchDialog)
+            log("Your wrench has been changed to `#PULL")
+        elseif string.upper(param) == "KICK" then
+            AddCallback("WrenchHook", "OnPacket", wk)
+            AddCallback("RWD", "OnVarlist", RemoveWrenchDialog)
+            log("Your wrench has been changed to `9KICK")
+        elseif string.upper(param) == "BAN" then
+            AddCallback("WrenchHook", "OnPacket", wb)
+            AddCallback("RWD", "OnVarlist", RemoveWrenchDialog)
+            log("Your wrench has been changed to `4WORLD BAN")
+        elseif string.upper(param) == "NORMAL" then
+            RemoveCallback("WrenchHook")
+            RemoveCallback("RWD")
+            log("Your wrench has been changed to `wNORMAL")
+        end
+        return true
+    elseif packet:find("action|input\n|text|/db") then
+        local number = tonumber(string.match(packet, "%d+"))
+        SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|7188|\nitem_count|"..number.."\n")
+        return true
+    elseif packet:find("action|input\n|text|/dal") then
+        for _,cur in pairs(GetInventory()) do
+            if cur.id == 1796 then
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|".. cur.id .."|\nitem_count|"..math.floor(cur.count).."\n")
+            end
+        end
+        return true
+    elseif packet:find("action|input\n|text|/proxy") then
+        SendVarlist(var_proxy)
+        return true
+    elseif packet:find("action|input\n|text|/balance") then
+        local wl_bal,dl_bal,bgl_bal = 0,0,0
+        for _,item in pairs(GetInventory()) do
+            if item.id == 242 then
+                wl_bal = wl_bal + item.count
+            elseif item.id == 1796 then
+                dl_bal = dl_bal + item.count
+            elseif item.id == 7188 then
+                bgl_bal = bgl_bal + item.count
+            end
+        end
+        log("`#You currently have : `9"..math.floor(wl_bal).." WL's`w, `c"..math.floor(dl_bal).." DL's`w, `b"..math.floor(bgl_bal).." BGL's")
+        return true
+    elseif packet:find("action|input\n|text|/change") then
+        RunThread(function()
+            for _,item in pairs(GetInventory()) do
+                if math.floor(item.id) == 1796 and item.count >= 100 then
+                    while GetDL() >= 100 do
+                        SendPacket(2,"action|dialog_return\ndialog_name|telephone\nnum|53785|\nx|"..telephone_posx.."|\ny|"..telephone_posy.."|\nbuttonClicked|bglconvert\n")
+                        Sleep(200)
+                    end
+                end
+            end
+        end)
+        return true
+    elseif packet:find("action|input\n|text|/blink") then
+        blinkstart = not blinkstart
+        RunThread(function()
+            local table_color = {1348237567,
+            1685231359,
+            2022356223,
+            2190853119,
+            2527912447,
+            2864971775,
+            3033464831,
+            3370516479,
+            2749215231,
+            3317842431,
+            726390783,
+            713703935,
+            3578898943,
+            4042322175,
+            3531226367,
+            4023103999,
+            194314239,
+            1345519520}
+            while blinkstart do
+                local random_index = math.random(#table_color)
+                local random_value = table_color[random_index]
+                Sleep(500)
+                SendPacket(2,"action|setSkin\ncolor|"..random_value)
+            end
+        end)
+        return true
+    elseif packet:find("action|input\n|text|/break") then
+        BreakBGL()
+        return true
+    elseif packet:find("action|input\n|text|/tax") then
+        local number = tonumber(string.match(packet, "%d+"))
+        taxbet = number
+        log("`bTax has been set to `2"..taxbet.."%")
+        return true
+    elseif packet:find("action|input\n|text|/setphone") then
+        telephone_posx = math.floor(GetLocal().pos_x/32)
+        telephone_posy = math.floor(GetLocal().pos_y/32)
+        log("`cCoordinate telephone has been set to ("..telephone_posx..","..telephone_posy..")")
+        return true
+    elseif packet:find("action|input\n|text|/wd") then
+        local number = tonumber(string.match(packet, "%d+"))
+            SendPacket(2,"action|dialog_return\ndialog_name|bank_withdraw\nbgl_count|"..number)
+        return true
+    elseif packet:find("action|input\n|text|/depo") then
+        for _,item in pairs(GetInventory()) do
+            if math.floor(item.id) == 7188 then
+                SendPacket(2,"action|dialog_return\ndialog_name|bank_deposit\nbgl_count|"..item.count.."\n")
+            end
+        end
+        return true
+    elseif packet:find("action|input\n|text|/pos1") then
+        sp1x = math.floor(GetLocal().pos_x/32)
+        sp1y = math.floor(GetLocal().pos_y/32)
+        log("POS1 SET AT ("..sp1x..","..sp1y..")")
+        return true
+    elseif packet:find("action|input\n|text|/pos2") then
+        sp2x = math.floor(GetLocal().pos_x/32)
+        sp2y = math.floor(GetLocal().pos_y/32)
+        log("POS2 SET AT ("..sp2x..","..sp2y..")")
+        return true
+    elseif packet:find("action|input\n|text|/tp") then
+        if sp1x == 0 and sp2x == 0 or sp1y == 0 and sp2y == 0 then
+            log("`4WARNING! `cYou need to set pos first (/sp)")
+            return true
+        end
+        local bet = 0
+        local curx,cury = math.floor(GetLocal().pos_x/32),math.floor(GetLocal().pos_y/32)
+        AddCallback("Bet","OnVarlist",function(v,p)
+            if v[0]:find("OnConsoleMessage") then
+                if v[1]:find("Collected  `w(%d+) Diamond Lock") then
+                    bet = bet + tonumber(string.match(v[1], "%d+")) 
+                elseif v[1]:find("Collected  `w(%d+) Blue Gem Lock") then
+                    bet = bet + tonumber(string.match(v[1], "%d+")) * 100 
+                end
+            end
+        end)
+        RunThread(function()
+            FindPath(sp1x,sp1y)
+            Sleep(500)
+            Collect()
+            Sleep(800)
+            Collect()
+            Sleep(500)
+            FindPath(sp2x,sp2y)
+            Sleep(500)
+            Collect()
+            Sleep(800)
+            Collect()
+            Sleep(500)
+            FindPath(curx,cury)
+            RemoveCallback("Bet")
+            purebet = bet
+            local tax = purebet * taxbet/100
+            local total = purebet - tax
+            if total % 1 >= 0.5 then
+              total = math.ceil(total)
+            else
+              total = math.floor(total)
+            end
+            log("`#Bet   : `2" .. math.floor(purebet) .." `cDiamond Locks")
+            log("`#Tax   : `2" .. math.floor(tax) .." `cDiamond Locks")
+            log("`#Total : `2" .. math.floor(total) .." `cDiamond Locks")
+        end)
+        return true
+    elseif packet:find("action|input\n|text|/game") then
+        local number = tonumber(string.match(packet, "%d+"))
+        purebet = number * 2
+        local tax = purebet * taxbet/100
+        local total = purebet - tax
+        if total % 1 >= 0.5 then
+          total = math.ceil(total)
+        else
+          total = math.floor(total)
+        end
+        log("`cGame has been set to `2" .. math.floor(purebet) .." `cDiamond Locks")
+        log("`#Bet   : `2" .. math.floor(purebet) .." `cDiamond Locks")
+        log("`#Tax   : `2" .. math.floor(tax) .." `cDiamond Locks")
+        log("`#Total : `2" .. math.floor(total) .." `cDiamond Locks")
+        return true
+    elseif packet:find("action|input\n|text|/gdrop") then
+        local curx,cury = math.floor(GetLocal().pos_x/32),math.floor(GetLocal().pos_y/32)
+        local tax = purebet * taxbet/100
+        local total = purebet - tax
+        if total % 1 >= 0.5 then
+          total = math.ceil(total)
+        else
+          total = math.floor(total)
+        end
+        local bgl = math.floor(total/100)
+        local dl = total%100
+        RunThread(function()
+            if GetDL() < total and GetDL() < dl then
+                while GetDL() < total and GetDL() < dl do
+                    BreakBGL()
+                    Sleep(500)
+                end
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|7188|\nitem_count|"..bgl.."\n")
+                Sleep(100)
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..dl.."\n")
+            elseif GetDL() < total then
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|7188|\nitem_count|"..bgl.."\n")
+                Sleep(100)
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..dl.."\n")
+            else 
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..total.."\n")
+            end
+        end)
+        return true
+    elseif packet:find("action|input\n|text|/w1") then
+        if sp1x == 0 and sp2x == 0 or sp1y == 0 and sp2y == 0 then
+            log("`4WARNING! `cYou need to set pos first (/sp)")
+            return true
+        end
+        local curx,cury = math.floor(GetLocal().pos_x/32),math.floor(GetLocal().pos_y/32)
+        local tax = purebet * taxbet/100
+        local total = purebet - tax
+        if total % 1 >= 0.5 then
+          total = math.ceil(total)
+        else
+          total = math.floor(total)
+        end
+        local bgl = math.floor(total/100)
+        local dl = total%100
+        RunThread(function()
+            FindPath(sp1x,sp1y)
+            Sleep(1000)
+            if GetDL() < total and GetDL() < dl then
+                while GetDL() < dl do
+                    BreakBGL()
+                    Sleep(500)
+                end
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|7188|\nitem_count|"..bgl.."\n")
+                Sleep(100)
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..dl.."\n")
+            elseif GetDL() < total then
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|7188|\nitem_count|"..bgl.."\n")
+                Sleep(100)
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..dl.."\n")
+            else 
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..total.."\n")
+            end
+            Sleep(1000)
+            FindPath(curx,cury)
+        end)
+        return true
+    elseif packet:find("action|input\n|text|/w2") then
+        if sp1x == 0 and sp2x == 0 or sp1y == 0 and sp2y == 0 then
+            log("`4WARNING! `cYou need to set pos first (/sp)")
+            return true
+        end
+        local curx,cury = math.floor(GetLocal().pos_x/32),math.floor(GetLocal().pos_y/32)
+        local tax = purebet * taxbet/100
+        local total = purebet - tax
+        if total % 1 >= 0.5 then
+          total = math.ceil(total)
+        else
+          total = math.floor(total)
+        end
+        local bgl = math.floor(total/100)
+        local dl = total%100
+        RunThread(function()
+            FindPath(sp2x,sp2y)
+            Sleep(1000)
+            if GetDL() < total and GetDL() < dl then
+                while GetDL() < dl do
+                    BreakBGL()
+                    Sleep(500)
+                end
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|7188|\nitem_count|"..bgl.."\n")
+                Sleep(100)
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..dl.."\n")
+            elseif GetDL() < total then
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|7188|\nitem_count|"..bgl.."\n")
+                Sleep(100)
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..dl.."\n")
+            else 
+                SendPacket(2,"action|dialog_return\ndialog_name|drop\nitem_drop|1796|\nitem_count|"..total.."\n")
+            end
+            Sleep(1000)
+            FindPath(curx,cury)
+        end)
+        return true
+    end
+end)
+else
+local warn_dialog = [[add_label_with_icon|small|Daily Script|left|7188|
+add_spacer|medium|
+add_smalltext|`4WARNING`` : `wYou dont have access to this script, click button bellow to buy``|left|482|
+add_spacer|smal|
+add_url_button||`cDiscord : `0DailyProfit|NOFLAGS|https://discord.gg/FDyj7Kbx7z|Open Link Discord DailyProfit ?|0|0|
+add_spacer|smal|
+add_smalltext|Copyright Dailybgl 2023|
+end_dialog|daily|Ok!||
+]]
+local var = {}
+var[0] = "OnDialogRequest"
+var[1] = warn_dialog
+var.netid = -1
+SendVarlist(var)
+end 
