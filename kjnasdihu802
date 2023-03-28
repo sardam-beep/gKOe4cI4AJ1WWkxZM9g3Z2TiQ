@@ -252,22 +252,30 @@ RemoveCallbacks()
             if getWear then
                 if item_break == 13826 and v[1]:find("`wLegendary Powers``") then
                     item_break_weared = true
+                    return true
                 elseif item_break == 13862 and v[1]:find("`wMythical Powers``") then
                     item_break_weared = true
+                    return true
                 elseif item_break == 5480 and v[1]:find("`wRayman's Fists!``") then
                     item_break_weared = true
+                    return true
                 else
                     item_break_weared = false
+                    return true
                 end
             else
                 if item_ptht == 13826 and v[1]:find("`wLegendary Powers``") then
                     item_harvest_weared = true
+                    return true
                 elseif item_ptht == 13862 and v[1]:find("`wMythical Powers``") then
                     item_harvest_weared = true
+                    return true
                 elseif item_ptht == 5480 and v[1]:find("`wRayman's Fists!``") then
                     item_harvest_weared = true
+                    return true
                 else
                     item_harvest_weared = false
+                    return true
                 end
             end
             return true
